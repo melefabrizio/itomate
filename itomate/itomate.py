@@ -4,15 +4,70 @@ import argparse
 import os
 import re
 import textwrap
+from pathlib import Path
 
 import iterm2
 import yaml
 
 default_config = 'itomate.yml'
-version = '0.3.9'
+version = '0.4.0'
 
 class ItomateException(Exception):
     """Raise for our custom exceptions"""
+
+def get_xdg_config_dir():
+    """Get the XDG config directory for itomate."""
+    # First try XDG_CONFIG_HOME environment variable
+    xdg_config_home = os.environ.get('XDG_CONFIG_HOME')
+    if xdg_config_home:
+        return Path(xdg_config_home) / "itomate"
+
+    # Fall back to ~/.config
+    return Path.home() / ".config" / "itomate"
+
+def find_config_file(config_name, base_dir=None):
+    """
+    Find a config file based on the name and optional base directory.
+
+    Args:
+        config_name: Name of the config file (without extension)
+        base_dir: Optional base directory to look in
+
+    Returns:
+        Path to the config file or None if not found
+    """
+    # Check if config_name already has an extension
+    if config_name.endswith('.yml') or config_name.endswith('.yaml'):
+        # If it's an absolute path or relative path with extension, use it directly
+        if os.path.isabs(config_name) or os.path.exists(config_name):
+            return config_name
+        config_name = os.path.splitext(config_name)[0]  # Remove extension for further checks
+
+    # Case 2: Base directory is specified
+    if base_dir:
+        base_path = Path(base_dir)
+        for ext in ['yaml', 'yml']:
+            config_path = base_path / f"{config_name}.{ext}"
+            if config_path.exists():
+                return str(config_path)
+
+    # Case 1: Look in XDG config directory
+    else:
+        config_dir = get_xdg_config_dir()
+        for ext in ['yaml', 'yml']:
+            config_path = config_dir / f"{config_name}.{ext}"
+            if config_path.exists():
+                return str(config_path)
+
+    # If nothing found and config_name isn't the default, try in current directory
+    if config_name != default_config:
+        for ext in ['yaml', 'yml']:
+            local_path = Path(f"{config_name}.{ext}")
+            if local_path.exists():
+                return str(local_path)
+
+    # If all else fails, return the original config_name (for backward compatibility)
+    return config_name
 
 # Gets the current window or creates one if needed
 async def get_current_window(app, connection, new, profile_name):
@@ -74,7 +129,7 @@ async def render_tab_panes(tab, panes, pofile_name):
             current_session = await current_session.async_split_pane(vertical=True, profile=pofile_name)
 
         if pane.get('badge'):
-                await add_badge(current_session, pane.get('badge'))
+            await add_badge(current_session, pane.get('badge'))
 
         # Cache the pane reference for further divisions later on
         sessions_ref[current_position] = current_session
@@ -111,7 +166,7 @@ async def render_tab_panes(tab, panes, pofile_name):
             if horizontal_pane.get('badge'):
                 await add_badge(current_session, horizontal_pane.get('badge'))
 
-           # Cache the pane reference for later use
+            # Cache the pane reference for later use
             sessions_ref[horizontal_position] = current_session
 
             if horizontal_pane.get('focus'):
@@ -142,9 +197,16 @@ def parse_arguments():
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
-    parser.add_argument('-c', '--config', help='Path to the configuration file')
+    # Create a mutually exclusive group for config and base-dir
+    config_group = parser.add_mutually_exclusive_group()
+    config_group.add_argument('-c', '--config', help='Path to the configuration file')
+    config_group.add_argument('-b', '--base-dir', help='Base directory for config file')
+
     parser.add_argument('-v', '--version', help='Show version', action='store_true')
     parser.add_argument('-n', '--new', help='Run in new window', action='store_true')
+
+    # Add positional argument for config name
+    parser.add_argument('config_name', nargs='?', help='Name of the config file (without extension)')
 
     return vars(parser.parse_args())
 
@@ -157,9 +219,35 @@ async def activate(connection):
     if args.get('version'):
         print(version)
         return
-    
-    config_path = args.get('config') if args.get('config') is not None else default_config
-    config = read_config(config_path)
+
+    # Determine the config path based on the provided arguments
+    if args.get('config'):
+        # Original behavior: use the provided config path
+        config_path = args.get('config')
+    elif args.get('config_name'):
+        # New behavior:
+        # 1. If base-dir is provided, look in that directory
+        # 2. Otherwise, look in XDG config directory
+        config_path = find_config_file(args.get('config_name'), args.get('base_dir'))
+    else:
+        # Default behavior: use the default config
+        config_path = default_config
+
+    try:
+        config = read_config(config_path)
+    except ItomateException as e:
+        # If config file doesn't exist, provide a helpful error message
+        if "Config file does not exist" in str(e):
+            if args.get('base_dir') and args.get('config_name'):
+                print(f"Error: Config '{args.get('config_name')}.[yaml|yml]' not found in {args.get('base_dir')}")
+            elif args.get('config_name'):
+                xdg_dir = get_xdg_config_dir()
+                print(f"Error: Config '{args.get('config_name')}.[yaml|yml]' not found in {xdg_dir}")
+            else:
+                print(f"Error: {e}")
+            return
+        else:
+            raise
 
     profile_name = config.get('profile') or 'Default'
 
