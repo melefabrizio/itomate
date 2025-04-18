@@ -8,12 +8,12 @@ with open("readme.md", "r") as fh:
 setuptools.setup(
     name="itomate",
     version=version,
-    author="Kamran Ahmed",
-    author_email="kamranahmed.se@gmail.com",
+    author="Fabrizio Mele",
+    author_email="fabrizio@mele.io",
     description="Automate your iTerm layouts and workflows",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/kamranahmedse/itomate",
+    url="https://github.com/melefabrizio/itomate",
     packages=setuptools.find_packages(),
     install_requires=[
         "iterm2>=1.1",

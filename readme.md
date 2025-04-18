@@ -1,8 +1,10 @@
-# iTomate
+# iTomate2
 
 <img width="450px" align="right" src="./.github/assets/illustration.png" />
 
 > Automate your iTerm layouts and session setup
+
+Forked from  [itomate](https://github.com/kamranahmedse/itomate).
 
 Define your iTerm layouts, commands to execute in the form of yaml files and run a single command to have iTerm prepare itself for you to start working.
 
@@ -16,7 +18,7 @@ Define your iTerm layouts, commands to execute in the form of yaml files and run
 Make sure that you are running Python 3.5 or later
 
 ```shell
-pip install itomate
+pip install itomate2
 ```
 
 [Enable Python API usage](./.github/assets/preferences.png) in iTerm preferences.
@@ -31,20 +33,41 @@ itomate --version
 ![](./.github/assets/itomate-demo.gif)
 
 ## Usage
-Open iTerm and simply run the below command
+You run itomate in several different ways:
 
 ```shell
+# Using config in XDG config directory
+itomate [configname]
+
+# Using explicit config file path
 itomate -c config.yml
-```
-If you don't provide `-c` flag, itomate will look for `itomate.yml` file in the current directory and use that.
 
-Here is the list of options available
+# Using config from a custom base directory
+itomate -b ~/.somedir configname
+```
+
+If you don't provide any arguments, itomate will look for `itomate.yml` file in the current directory.
+
+### Config file resolution
+
+itomate2 searches for config files in the following order:
+
+- Explicit path if `-c` flag is provided
+- In the directory specified by `-b` flag if provided along with a config name
+- In the XDG config directory (`~/.config/itomate/` or `$XDG_CONFIG_HOME/itomate/`) if a config name is provided
+- In the current directory (looking for `itomate.yml` by default or the specified config name)
+
+Both .yaml and .yml extensions are supported.
+
+### Command line arguments
 
 ```shell
-itomate [-c,--config <config-file>] # Sets up the iTerm session
-        [-h,--help]                 # Shows the help screen
-        [-v,--version]              # Shows the installed itomate version
-        [-n,--new]                  # Runs itomate in a new window
+itomate [configname]                # Uses a config from ~/.config/itomate/ directory
+itomate [-c,--config <config-file>] # Sets up the iTerm session with the specified config file
+itomate [-b,--base-dir <directory>] # Specifies a base directory to look for configs
+itomate [-h,--help]                 # Shows the help screen
+itomate [-v,--version]              # Shows the installed itomate2 version
+itomate [-n,--new]                  # Runs itomate in a new window
 ```
 
 ## Configuration
@@ -279,8 +302,11 @@ tabs:
 ```
 
 ## Contributors
+This tool is a fork from [itomate](https://github.com/kamranahmedse/itomate) with some new features.
+
 Special thanks to the contributors for making iTomate possible
 
+- [@kamranahmedse](https://github.com/kamranahmedse) - Original Author
 * [@zakiuu](https://github.com/zakiuu)
 * [@JohnLegrandRichards](https://github.com/JohnLegrandRichards)
 * [@zachvalenta](https://github.com/zachvalenta)
@@ -291,6 +317,8 @@ Special thanks to the contributors for making iTomate possible
 ## Similar Projects
 
 There is [itermocil](https://github.com/TomAnthony/itermocil/blob/master/README.md) which relies on [Applescript that has been deprecated by iTerm](https://www.iterm2.com/documentation-scripting.html), has limited layout options, and is pretty limited in terms of what it can achieve because of AppleScript. iTomate on the other hand uses iTerm's [newly introduced Python API](https://www.iterm2.com/python-api/), has flexible layouts support and can be extended using iTerm's pretty powerful API.
+
+Original project is  [itomate](https://github.com/kamranahmedse/itomate).
 
 ## Contributions
 Feel free to submit pull requests, create issues, spread the word.

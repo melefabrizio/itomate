@@ -5,3 +5,4 @@ dist
 build
 itomate.egg-info
 ___pycache__
+**/__pycache__
