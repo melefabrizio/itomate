@@ -4,10 +4,7 @@ setup:
 	rm -rf venv
 	python3 -m venv venv
 	chmod +x venv/bin/*
-	# These needs to be run manually, having them here won't
-	# work in the execution context of the Makefile
-	. ./venv/bin/activate
-	pip install --upgrade setuptools --force-reinstall wheel twine iterm2 pyyaml PyObjC PyObjC-core
+	bash -c "source ./venv/bin/activate && pip install --upgrade setuptools --force-reinstall wheel twine iterm2 pyyaml PyObjC PyObjC-core"
 
 clean:
 	rm -rf build dist itomate.egg-info
