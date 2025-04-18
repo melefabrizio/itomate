@@ -6,7 +6,7 @@ with open("readme.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="itomate",
+    name="itomate2",
     version=version,
     author="Fabrizio Mele",
     author_email="fabrizio@mele.io",
