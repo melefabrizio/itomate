@@ -36,7 +36,7 @@ itomate --version
 You run itomate in several different ways:
 
 ```shell
-# Using config in XDG config directory
+# Using configname.yml in XDG config directory
 itomate [configname]
 
 # Using explicit config file path
@@ -46,7 +46,11 @@ itomate -c config.yml
 itomate -b ~/.somedir configname
 ```
 
-If you don't provide any arguments, itomate will look for `itomate.yml` file in the current directory.
+Configurations stored in the config directory must be invoked without the yml suffix.
+For example, `itomate project` will look for `~/.config/itomate/project.yml`
+or `~/.config/itomate/project.yaml`.
+
+If you don't provide any arguments, itomate will look for an `itomate.yml` file in the current directory.
 
 ### Config file resolution
 
@@ -54,10 +58,11 @@ itomate2 searches for config files in the following order:
 
 - Explicit path if `-c` flag is provided
 - In the directory specified by `-b` flag if provided along with a config name
-- In the XDG config directory (`~/.config/itomate/` or `$XDG_CONFIG_HOME/itomate/`) if a config name is provided
+- In the XDG config directory (`~/.config/itomate/` or `$XDG_CONFIG_HOME/itomate/`) if a config name is provided without the `-b` flag
 - In the current directory (looking for `itomate.yml` by default or the specified config name)
 
-Both .yaml and .yml extensions are supported.
+Both .yaml and .yml extensions are supported for explicit or config_name arguments.
+The default file, `itomate.yml`, must be named exactly `itomate.yml`.
 
 ### Command line arguments
 
