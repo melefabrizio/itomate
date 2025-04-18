@@ -326,3 +326,5 @@ Feel free to submit pull requests, create issues, spread the word.
 ## License
 
 MIT &copy; [Kamran Ahmed](https://twitter.com/kamranahmedse)
+
+MIT &copy; 2025 [Fabrizio Mele](https://github.com/melefabrizio)
